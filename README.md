@@ -66,7 +66,7 @@ Ce projet peut utiliser une instance locale de **LM Studio** pour générer les 
 - Configuration: définir l'URL de l'API LM Studio dans la variable d'environnement `LM_STUDIO_API_URL`. Exemple (PowerShell):
 
 ```powershell
-$env:LM_STUDIO_API_URL = "http://127.0.0.1:8080/api/rest/generate"
+$env:LM_STUDIO_API_URL = "http://127.0.0.1:1234/v1/chat/completions"
 $env:LM_STUDIO_MODEL = "meta-llama-3.1-8b-instruct"
 npm start
 ```
