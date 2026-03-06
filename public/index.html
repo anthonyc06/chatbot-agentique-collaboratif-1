@@ -1,4 +1,10 @@
 <!doctype html>
+<!--
+  Interface web minimale du chatbot.
+  - Envoie les messages de l'utilisateur à POST /api/message
+  - Affiche les bulles de conversation (user / bot)
+  Contribuez en étendant le frontend ou en remplaçant la logique d'appel.
+-->
 <html>
 <head>
   <meta charset="utf-8">
@@ -51,45 +57,77 @@
     const messages = document.getElementById('messages');
     const sendBtn = document.getElementById('send');
 
-    function timeNow(){const d=new Date();return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+    // Retourne une chaîne HH:MM pour la méta des messages
+    function timeNow() {
+      const d = new Date();
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
 
-    function appendBubble(text, who){
+    // Ajoute une bulle de chat dans la zone des messages.
+    // `who` est 'user' ou 'bot' et contrôle le style et l'alignement.
+    function appendBubble(text, who) {
       const wrap = document.createElement('div');
       wrap.className = 'wrap ' + who;
       const bubble = document.createElement('div');
       bubble.className = 'bubble ' + who;
       bubble.textContent = text;
       wrap.appendChild(bubble);
-      const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (who === 'user' ? 'User' : 'Bot') + ' · ' + timeNow(); wrap.appendChild(meta);
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = (who === 'user' ? 'User' : 'Bot') + ' · ' + timeNow();
+      wrap.appendChild(meta);
       messages.appendChild(wrap);
+      // Défiler vers le bas après ajout du message
       messages.scrollTop = messages.scrollHeight;
     }
 
-    function setBusy(b){ sendBtn.disabled = b; input.disabled = b; if(b) sendBtn.textContent='…'; else sendBtn.textContent='Envoyer'; }
+    // Basculer l'état occupé de l'interface pendant l'attente
+    function setBusy(b) {
+      sendBtn.disabled = b;
+      input.disabled = b;
+      sendBtn.textContent = b ? '…' : 'Envoyer';
+    }
 
-    async function send(text){
+    // Envoie le message au serveur et affiche la réponse
+    async function send(text) {
       appendBubble(text, 'user');
       setBusy(true);
-      // show typing indicator
-      const typing = document.createElement('div'); typing.className='meta typing'; typing.textContent='Bot est en train d\'écrire...'; messages.appendChild(typing); messages.scrollTop = messages.scrollHeight;
 
-      try{
-        const res = await fetch('/api/message', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message:text})});
+      // Affiche un indicateur de saisie en attendant la réponse
+      const typing = document.createElement('div');
+      typing.className = 'meta typing';
+      typing.textContent = "Bot est en train d'écrire...";
+      messages.appendChild(typing);
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch('/api/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text }),
+        });
         const data = await res.json();
         messages.removeChild(typing);
         appendBubble(data.reply || 'todo', 'bot');
-      }catch(err){
+      } catch (err) {
+        // En cas d'erreur réseau, remplacer l'indicateur et informer l'utilisateur
         messages.removeChild(typing);
         appendBubble('Erreur réseau', 'bot');
-      } finally{ setBusy(false); }
+      } finally {
+        setBusy(false);
+      }
     }
 
-    form.addEventListener('submit', (e)=>{
+    // Soumission du formulaire : lecture du champ, nettoyage et envoi
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const text = input.value.trim(); if(!text) return; input.value=''; send(text);
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      send(text);
     });
 
-    // quick demo message
+    // Message de démonstration initial
     appendBubble('Bonjour, comment puis-je vous aider ?', 'bot');
   </script>
 </body>

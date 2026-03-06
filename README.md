@@ -32,3 +32,53 @@ npm start
 Rien n'est imposé: commencez par créer un agent simple dans `src/` et ouvrez une PR.
 
 Amusez-vous et codez ensemble !
+
+## Structure du projet (base minimale)
+
+Ce dépôt contient une base très légère pour démarrer le travail en équipe. Voici les fichiers et dossiers fournis :
+
+- `package.json` : configuration minimale Node.js (script `npm start` lance le serveur).
+- `src/index.js` : serveur Express minimal qui sert la page front et expose l'API POST `/api/message`.
+- `public/index.html` : interface web minimaliste (UI de chat) pour envoyer des messages et afficher les réponses.
+- `.github/PULL_REQUEST_TEMPLATE.md` : modèle de Pull Request pour standardiser les contributions.
+- `README.md` : ce fichier — concept, démarrage et structure.
+
+Conseil : les contributeurs peuvent ajouter des dossiers `src/agents`, `src/tools` ou `tests/` selon leurs besoins. L'idée est que l'équipe complète progressivement cette base.
+
+**Démarrage rapide**
+1. Installez Node.js (version LTS recommandée).
+2. Clonez le dépôt et installez les dépendances.
+
+```bash
+git clone <repo>
+cd chatbot-agentique-collaboratif-1
+npm install
+npm start
+```
+
+La page est alors disponible sur `http://localhost:3000/`.
+
+## Intégration avec LM Studio (optionnel, recommandé)
+
+Ce projet peut utiliser une instance locale de **LM Studio** pour générer les réponses.
+
+- Prérequis: LM Studio tournant en local (ou accessible depuis le serveur). Je recommande le modèle `meta-llama-3.1-8b-instruct`.
+- Configuration: définir l'URL de l'API LM Studio dans la variable d'environnement `LM_STUDIO_API_URL`. Exemple (PowerShell):
+
+```powershell
+$env:LM_STUDIO_API_URL = "http://127.0.0.1:8080/api/rest/generate"
+$env:LM_STUDIO_MODEL = "meta-llama-3.1-8b-instruct"
+npm start
+```
+
+Le serveur enverra le message au endpoint configuré en POST avec un JSON minimale: `{ "prompt": "<message>", "model": "<model>" }`.
+
+Remarques:
+- Selon la configuration / version de LM Studio que vous utilisez, le chemin d'API et le format de la requête peuvent varier. Si votre endpoint attend un autre schéma, mettez à jour `LM_STUDIO_API_URL` pour pointer vers le bon chemin, ou adaptez `src/index.js` (fonction `callLmStudio`) pour correspondre au format attendu.
+- Si LM Studio n'est pas configuré, l'API renvoie une réponse placeholder (`todo`) ou des règles locales simples (`bonjour`, `/echo`).
+
+Exemple de test direct avec `curl` (si votre LM Studio accepte un JSON avec `prompt`):
+
+```bash
+curl -X POST "$LM_STUDIO_API_URL" -H "Content-Type: application/json" -d '{"prompt":"Bonjour","model":"meta-llama-3.1-8b-instruct"}'
+```
